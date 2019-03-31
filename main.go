@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -15,7 +17,7 @@ func readEnvFile(fileName string) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatalf("Error - unable to open file: %s\n", err)
-	}
+	}printOutput
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&config)
@@ -28,6 +30,32 @@ func readEnvFile(fileName string) {
 		// os.Setenv(k, v)
 		os.Setenv(k, fmt.Sprintf("%v", v))
 	}
+}
+
+func printOutput(response *http.Response) {
+	fmt.Println("Response Status:", response.Status, "\n")
+	fmt.Println("Response Headers:", response.Header, "\n")
+
+	// data, _ := ioutil.ReadAll(response.Body)
+	// fmt.Println(string(data))
+
+	//print body
+	//convert the response to a pretty JSON to print to screen.
+	bodyJson := make(map[string]interface{})
+	decoder := json.NewDecoder(response.Body)
+	err := decoder.Decode(&bodyJson)
+	if err != nil {
+		data, _ := ioutil.ReadAll(response.Body)
+		fmt.Println("Raw JSON: " + string(data) + "\n")
+		log.Fatalf("Error - unable to decode JSON: %s\n", err)
+	}
+
+	body, err := json.MarshalIndent(bodyJson, "", "  ")
+	if err != nil {
+		log.Fatalf("formatting JSON: %s\n", err)
+	}
+
+	fmt.Printf("Response body: %s\n\n", body)
 }
 
 func main() {

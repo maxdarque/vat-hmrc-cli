@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -25,28 +23,7 @@ func getRequest(u string) {
 	}
 	defer response.Body.Close()
 
-	fmt.Println("response Status:", response.Status)
-	fmt.Println("response Headers:", response.Header)
-
-	//convert the response to a pretty JSON to print to screen.
-	bodyJson := make(map[string]interface{})
-	decoder := json.NewDecoder(response.Body)
-	err = decoder.Decode(&bodyJson)
-	if err != nil {
-		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println("Raw JSON: " + string(data) + "\n")
-		log.Fatalf("Error - unable to decode JSON: %s\n", err)
-	}
-
-	body, err := json.MarshalIndent(bodyJson, "", "  ")
-	if err != nil {
-		log.Fatalf("Error converting tokent to file: %s\n", err)
-	}
-
-	fmt.Printf("Response body: %s\n\n", body)
-
-	// data, _ := ioutil.ReadAll(response.Body)
-	// fmt.Println(string(data))
+	printOutput(response)
 }
 
 func getQueryOnDates(args []string) string {

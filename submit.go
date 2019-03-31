@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 )
 
-type vatReturn struct {
+type VatReturn struct {
 	PeriodKey                    string  `json:"periodKey"`
 	VatDueSales                  float64 `json:"vatDueSales"`
 	VatDueAcquisitions           float64 `json:"vatDueAcquisitions"`
@@ -44,7 +43,7 @@ func submit(args []string) {
 	}
 
 	fileName := args[1]
-	var vatReturnJson vatReturn
+	var vatReturn VatReturn
 
 	//load json
 	//fileName is the path to the json config file
@@ -54,9 +53,15 @@ func submit(args []string) {
 	}
 
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&vatReturnJson)
+	err = decoder.Decode(&vatReturn)
 	if err != nil {
 		log.Fatalf("Error - unable to decode JSON: %s\n", err)
+	}
+
+	//convert struct to []byte
+	vatReturnJson, err := json.Marshal(vatReturn)
+	if err != nil {
+		log.Fatalf("Error - unable to convert JSON to byte array: %s\n", err)
 	}
 
 	// fmt.Printf("K %f\n", vatReturnJson.NetVatDue)
@@ -66,11 +71,11 @@ func submit(args []string) {
 
 	fmt.Printf("Post URL: " + u + "\n\n")
 
-	var jsonStr = []byte(`{"title":"Buy cheese and bread for breakfast."}`)
+	// var jsonStr = []byte(`{"title":"Buy cheese and bread for breakfast."}`)
 
 	token := loadTokenFile()
 	client := &http.Client{}
-	request, _ := http.NewRequest("POST", u, bytes.NewBuffer(jsonStr))
+	request, _ := http.NewRequest("POST", u, bytes.NewBuffer(vatReturnJson))
 	request.Header.Set("Accept", "application/vnd.hmrc.1.0+json")
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+token.AccessToken)
@@ -82,10 +87,6 @@ func submit(args []string) {
 	}
 	defer response.Body.Close()
 
-	fmt.Println("response Status:", response.Status)
-	fmt.Println("response Headers:", response.Header)
-	body, _ := ioutil.ReadAll(response.Body)
-	fmt.Println("response Body:", string(body))
-
+	printOutput(response)
 	//save the response
 }
