@@ -19,7 +19,7 @@ func loadTokenFile() oauth2.Token {
 
 	file, err := os.Open("token.json")
 	if err != nil {
-		log.Fatalln("Error - unable to open token file at token.json: ", err)
+		log.Fatalln("Error - unable to open token file at token.json. You may need to login first. Here's the erro: ", err)
 	}
 
 	decoder := json.NewDecoder(file)
@@ -76,9 +76,10 @@ func authorize(w http.ResponseWriter, r *http.Request) {
 	err = ioutil.WriteFile("token.json", file, 0644)
 	if err != nil {
 		fmt.Printf("Error saving token to token.json file: %s", err)
-	} else {
-		fmt.Println("Token successfully saved to token.json")
 	}
+
+	fmt.Println("Token successfully saved to token.json")
+	fmt.Println("Remember to save your VRN to the env.json file")
 }
 
 func auth() {
@@ -115,6 +116,6 @@ func auth() {
 	http.HandleFunc(redirectEndPoint, authorize)
 
 	// 3 - We start up our Client on port 3000
-	log.Printf("Client is running at %s port.\n", port)
+	log.Printf("Client is running at %s port. Open %s in your browser to authenticate this device.\n", port, host)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

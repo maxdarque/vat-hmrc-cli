@@ -1,2 +1,5 @@
 env.json
 token.json
+deviceID.json
+logs/*
+config/*

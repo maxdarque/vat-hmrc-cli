@@ -10,12 +10,9 @@ import (
 )
 
 func getRequest(u string) {
-	token := loadTokenFile()
 	client := &http.Client{}
 	request, _ := http.NewRequest("GET", u, nil)
-	request.Header.Set("Accept", "application/vnd.hmrc.1.0+json")
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+token.AccessToken)
+	setHeaders(request)
 	fmt.Printf("Get URL: " + u + "\n\n")
 	response, err := client.Do(request)
 	if err != nil {
@@ -23,7 +20,7 @@ func getRequest(u string) {
 	}
 	defer response.Body.Close()
 
-	printOutput(response)
+	saveResponse(response)
 }
 
 func getQueryOnDates(args []string) string {
@@ -47,27 +44,29 @@ func get(args []string) {
 	}
 
 	var u, query string
-	rootUrl := os.Getenv("apiUrl") + "/organisations/vat/" + os.Getenv("vrn")
+	rootURL := os.Getenv("apiUrl") + "/organisations/vat/" + os.Getenv("vrn")
 	command := args[1]
 
-	if command == "owned" || command == "1" {
+	if command == "help" {
+		fmt.Printf("#1 'get owned' what you owe\n#2 'get owned-dates fromDate toDate' what you owe\n#3 'get liabilities fromDate toDate' for outstanding payments\n#4 'get payments fromDate toDate' for payments HMRC has received\n#5 'get return periodKey' get the return for a given period denoted by the periodKey i.e. 18AD\n\n[Note: dates to be in following format: yyyy-mm-dd. If no date is given, then the program will default to the preciding one year period. The 'get' command can use numbers shown instead of commands i.e. 'get 2']\n")
+	} else if command == "owned" || command == "1" {
 		fmt.Println("Getting open VAT obligations ...")
-		u = rootUrl + "/obligations"
+		u = rootURL + "/obligations"
 		query = "?status=O"
 		getRequest(u + query)
 	} else if command == "owned-dates" || command == "2" {
 		fmt.Println("Getting VAT obligations within given dates ...")
-		u = rootUrl + "/obligations"
+		u = rootURL + "/obligations"
 		query = getQueryOnDates(args)
 		getRequest(u + query)
 	} else if command == "liabilities" || command == "3" {
 		fmt.Println("Getting outstanding payments due to HMRC...")
-		u = rootUrl + "/liabilities"
+		u = rootURL + "/liabilities"
 		query = getQueryOnDates(args)
 		getRequest(u + query)
 	} else if command == "payments" || command == "4" {
 		fmt.Println("Getting payments HMRC has received...")
-		u = rootUrl + "/payments"
+		u = rootURL + "/payments"
 		query = getQueryOnDates(args)
 		getRequest(u + query)
 	} else if command == "return" || command == "5" {
@@ -76,7 +75,7 @@ func get(args []string) {
 			log.Fatalln("Period key needed to fetch return. See help")
 		}
 		periodKey := url.QueryEscape(args[2])
-		u = rootUrl + "/returns/" + periodKey
+		u = rootURL + "/returns/" + periodKey
 		getRequest(u)
 	} else {
 		fmt.Println("Command not recognized")

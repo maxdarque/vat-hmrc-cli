@@ -9,7 +9,8 @@ import (
 	"os"
 )
 
-type VatReturn struct {
+//vatReturn - Structure for a VAT return
+type vatReturn struct {
 	PeriodKey                    string  `json:"periodKey"`
 	VatDueSales                  float64 `json:"vatDueSales"`
 	VatDueAcquisitions           float64 `json:"vatDueAcquisitions"`
@@ -43,7 +44,7 @@ func submit(args []string) {
 	}
 
 	fileName := args[1]
-	var vatReturn VatReturn
+	var v vatReturn
 
 	//load json
 	//fileName is the path to the json config file
@@ -53,18 +54,18 @@ func submit(args []string) {
 	}
 
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&vatReturn)
+	err = decoder.Decode(&v)
 	if err != nil {
 		log.Fatalf("Error - unable to decode JSON: %s\n", err)
 	}
 
 	//convert struct to []byte
-	vatReturnJson, err := json.Marshal(vatReturn)
+	vatReturnJSON, err := json.Marshal(v)
 	if err != nil {
 		log.Fatalf("Error - unable to convert JSON to byte array: %s\n", err)
 	}
 
-	// fmt.Printf("K %f\n", vatReturnJson.NetVatDue)
+	// fmt.Printf("K %f\n", vatReturnJSON.NetVatDue)
 
 	//create the url and send the post with the details
 	u := os.Getenv("apiUrl") + "/organisations/vat/" + os.Getenv("vrn") + "/returns"
@@ -73,12 +74,9 @@ func submit(args []string) {
 
 	// var jsonStr = []byte(`{"title":"Buy cheese and bread for breakfast."}`)
 
-	token := loadTokenFile()
 	client := &http.Client{}
-	request, _ := http.NewRequest("POST", u, bytes.NewBuffer(vatReturnJson))
-	request.Header.Set("Accept", "application/vnd.hmrc.1.0+json")
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+token.AccessToken)
+	request, _ := http.NewRequest("POST", u, bytes.NewBuffer(vatReturnJSON))
+	setHeaders(request)
 
 	response, err := client.Do(request)
 
@@ -87,6 +85,5 @@ func submit(args []string) {
 	}
 	defer response.Body.Close()
 
-	printOutput(response)
-	//save the response
+	saveResponse(response)
 }
