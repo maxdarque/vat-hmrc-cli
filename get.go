@@ -44,7 +44,7 @@ func get(args []string) {
 	}
 
 	var u, query string
-	rootURL := os.Getenv("apiUrl") + "/organisations/vat/" + os.Getenv("vrn")
+	rootURL := os.Getenv("API_URL") + "/organisations/vat/" + os.Getenv("VRN")
 	command := args[1]
 
 	if command == "help" {

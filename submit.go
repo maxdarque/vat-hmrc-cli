@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -68,11 +69,22 @@ func submit(args []string) {
 	// fmt.Printf("K %f\n", vatReturnJSON.NetVatDue)
 
 	//create the url and send the post with the details
-	u := os.Getenv("apiUrl") + "/organisations/vat/" + os.Getenv("vrn") + "/returns"
+	u := os.Getenv("API_URL") + "/organisations/vat/" + os.Getenv("VRN") + "/returns"
 
 	fmt.Printf("Post URL: " + u + "\n\n")
 
 	// var jsonStr = []byte(`{"title":"Buy cheese and bread for breakfast."}`)
+
+	fmt.Println("When you submit this VAT information you are making a legal declaration that the information is true and complete. A false declaration can result in prosecution.")
+	reader := bufio.NewReader(os.Stdin)
+	// defer reader.Cl
+	fmt.Print("Do you agree to the declaration above: (y/n) ")
+	text, _ := reader.ReadString('\n')
+	// fmt.Println(text)
+	if text != "y\n" && text != "Yes\n" && text != "yes\n" {
+		fmt.Print("You've not agreed to the declaration\n")
+		return
+	}
 
 	client := &http.Client{}
 	request, _ := http.NewRequest("POST", u, bytes.NewBuffer(vatReturnJSON))

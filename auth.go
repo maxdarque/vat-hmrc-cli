@@ -34,7 +34,8 @@ func loadTokenFile() oauth2.Token {
 // Homepage
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Homepage hit")
-	u := oauth2config.AuthCodeURL(os.Getenv("stateRand"))
+	u := oauth2config.AuthCodeURL(os.Getenv("STATE_CHECK"))
+	fmt.Println("URL: ", u)
 	http.Redirect(w, r, u, http.StatusFound)
 }
 
@@ -42,7 +43,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func authorize(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	state := r.Form.Get("state")
-	if state != os.Getenv("stateRand") {
+	if state != os.Getenv("STATE_CHECK") {
 		http.Error(w, "State invalid", http.StatusBadRequest)
 		return
 	}
@@ -90,8 +91,8 @@ func auth() {
 	fmt.Println(host + redirectEndPoint)
 
 	oauth2config = oauth2.Config{
-		ClientID:     os.Getenv("clientId"),
-		ClientSecret: os.Getenv("clientSecret"),
+		ClientID:     os.Getenv("CLIENT_ID"),
+		ClientSecret: os.Getenv("CLIENT_SECRET"),
 		Scopes:       []string{"read:vat", "write:vat"}, //write:vat
 		// Scopes:      []string{"Read-Only"},
 		RedirectURL: host + redirectEndPoint,
@@ -99,8 +100,8 @@ func auth() {
 		// if our Client ID and Client Secret are valid
 		// it will attempt to authorize our user
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  os.Getenv("apiUrl") + "/oauth/authorize",
-			TokenURL: os.Getenv("apiUrl") + "/oauth/token",
+			AuthURL:  os.Getenv("API_URL") + "/oauth/authorize",
+			TokenURL: os.Getenv("API_URL") + "/oauth/token",
 		},
 	}
 

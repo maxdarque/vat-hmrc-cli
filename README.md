@@ -35,12 +35,12 @@
 4. Save your settings to the env.json file in the root directory
 ```json
 {
-  "apiUrl": "https://test-api.service.hmrc.gov.uk",
-  "clientId": "YOUR-CLIENT-ID",
-  "clientSecret": "YOUR-CLIENT-SECRET",
-  "serverToken": "YOUR-SERVER-TOKEN",
-  "stateRand": "RANDOM-STRING-YOU-GENERATE-VIA-UUID-OR-MD5",
-  "vrn": "YOUR-COMPANY-VRN-NUMBER",
+  "API_URL": "https://test-api.service.hmrc.gov.uk",
+  "CLIENT_ID": "YOUR-CLIENT-ID",
+  "CLIENT_SECRET": "YOUR-CLIENT-SECRET",
+  "SERVER_TOKEN": "YOUR-SERVER-TOKEN",
+  "STATE_CHECK": "RANDOM-STRING-YOU-GENERATE-VIA-UUID-OR-MD5",
+  "VRN": "YOUR-COMPANY-VRN-NUMBER",
 }
 ```
 5. You are ready to run the app using the CLI via `go run *.go help`
